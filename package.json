@@ -1,0 +1,30 @@
+{
+  "name": "test_bot_4",
+  "version": "1.0.0",
+  "description": "",
+  "main": "src/index.js",
+  "scripts": {
+    "start": "node src/index.js",
+    "start:dev": "nodemon src/index.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "nodemon": "^3.0.1"
+  },
+  "dependencies": {
+    "@types/dotenv": "^8.2.0",
+    "@types/node": "^20.8.7",
+    "axios": "^1.5.1",
+    "dotenv": "^16.3.1",
+    "google-auth-library": "^8.9.0",
+    "google-spreadsheet": "^4.1.0",
+    "process": "^0.11.10",
+    "telegraf": "^4.14.0",
+    "telegram-inline-calendar": "^2.0.6",
+    "yandex-disk": "^0.0.8"
+  },
+  "type": "module"
+}
