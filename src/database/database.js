@@ -21,7 +21,7 @@ class Database {
 
 
         const r=await Axios.post(
-            `http://localhost:3100/kit/get-user-name`,
+            `http://localhost:3110/kit/get-user-name`,
             {nick:nick}
         )
 
@@ -31,7 +31,7 @@ class Database {
     async getLastVisit(nick) {
 
         const r=await Axios.post(
-            `http://localhost:3100/kit/get-last-visit`,
+            `http://localhost:3110/kit/get-last-visit`,
             // `${this.url}/kit/get-user-name`,
             {nick:nick}
         )
@@ -42,7 +42,7 @@ class Database {
     async getLessons(user) {
 
         const r=await Axios.post(
-            `http://localhost:3100/kit/get-lessons-by-user`,
+            `http://localhost:3110/kit/get-lessons-by-user`,
             {nick:user}
         )
 
@@ -52,7 +52,7 @@ class Database {
     async getClasses(lesson) {
 
         const r=await Axios.get(
-            `http://localhost:3100/kit/get-classes-by-lesson/${lesson}`,
+            `http://localhost:3110/kit/get-classes-by-lesson/${lesson}`,
         )
 
         return r.data
@@ -61,7 +61,7 @@ class Database {
     async getStudents(classs) {
 
         const r=await Axios.get(
-            `http://localhost:3100/kit/get-kids-by-classes/${classs}`,
+            `http://localhost:3110/kit/get-kids-by-classes/${classs}`,
         )
 
         return r.data
@@ -69,7 +69,7 @@ class Database {
 
     async saveFeedback(newData) {
         const r=await Axios.post(
-            `http://localhost:3100/kit/write-feedback`,
+            `http://localhost:3110/kit/write-feedback`,
             newData
         )
         return r.data
