@@ -55,7 +55,11 @@ const calendarScene = new Composer()
 calendarScene.on('callback_query', async (ctx) => {
 
     if (ctx.update?.callback_query?.data == 'now') {
-        ctx.wizard.state.data.date = new Date().toLocaleDateString()
+        ctx.wizard.state.data.date = new Date().toLocaleDateString(
+            'ru-Ru',
+                {},
+    )
+        console.log(ctx.wizard.state.data.date)
         ctx.wizard.next();
         return ctx.wizard.steps[ctx.wizard.cursor].handler(ctx);
     }
@@ -135,8 +139,10 @@ whoWasScene.action('next', async (ctx) => {
 })
 whoWasScene.on(['callback_query', 'text'], async (ctx) => {
     console.log('who was')
+    let firstLaunch=false
     if (!ctx.wizard.state.data.hasOwnProperty('theme')){
         ctx.wizard.state.data.theme = ctx.updateType == 'message' ? ctx.update.message.text : ''
+        firstLaunch=true
         console.log( ctx.wizard.state.data.theme)
     }
 
@@ -148,7 +154,8 @@ whoWasScene.on(['callback_query', 'text'], async (ctx) => {
         ctx.wizard.state.data.items = new Map();
         ctx.wizard.state.data.buttons = [];
     }
-    await sel.multiSelection(ctx, 'studentNames', 'Кто присутствовал?')
+    if ((ctx.updateType=='message'&&firstLaunch)||ctx.updateType=="callback_query")
+        await sel.multiSelection(ctx, 'studentNames', 'Кто присутствовал?')
 })
 
 
