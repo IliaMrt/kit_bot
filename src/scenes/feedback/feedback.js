@@ -83,7 +83,7 @@ const homeTaskScene = new Composer()
 
 homeTaskScene.on("callback_query", (ctx) => {
     if (ctx.update.callback_query.data == 'cancel') {
-        ctx.wizard.state.data.homeTask = ''
+        ctx.wizard.state.data.homework = ''
         ctx.wizard.next();
         return ctx.wizard.steps[ctx.wizard.cursor].handler(ctx)
     }
@@ -97,9 +97,9 @@ const themeScene = new Composer()
 themeScene.on(["text", "callback_query"], async (ctx) => {
     console.log(JSON.stringify(ctx.update))
     if (ctx.update.hasOwnProperty("callback_query")) {
-        ctx.wizard.state.data.homeTask = ''
+        ctx.wizard.state.data.homework = ''
     } else {
-        ctx.wizard.state.data.homeTask = ctx.update.message.text
+        ctx.wizard.state.data.homework= ctx.update.message.text
     }
     ctx.reply('Какая была тема урока?',
         Markup.inlineKeyboard([Markup.button.callback('Без темы', 'cancel')]))
@@ -282,7 +282,7 @@ checkScene.on(['text', 'callback_query'], async (ctx) => {
     Урок: ${ctx.wizard.state.data.lesson}
     Класс: ${ctx.wizard.state.data.class}
     Когда: ${ctx.wizard.state.data.date}
-    ДЗ: ${ctx.wizard.state.data.homeTask}
+    ДЗ: ${ctx.wizard.state.data.homework}
     Тема: ${ctx.wizard.state.data.theme}
     ${fitText(students)}
     
