@@ -8,8 +8,8 @@ import {feedbackScene} from "./scenes/feedback/feedback.js";
 import {errorScene} from "./scenes/error.js";
 import {Interface} from "./interface/interface.js";
 
-await readSettings();
 
+await readSettings();
 await database.init()
 export const bot = new Telegraf(process.env.TELEGRAF_TOKEN);
 const stage = new Scenes.Stage(

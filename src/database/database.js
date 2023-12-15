@@ -1,57 +1,98 @@
 import {Markup} from "telegraf";
-import Axios from "axios";
+import Axios, {all} from "axios";
+import axiosRetry from 'axios-retry';
+import axios from "axios";
+import {isArray} from "util";
 
 class Database {
     instance = null;
-    url=''
-
 
     constructor() {
         if (this.instance) { // проверяем что значение #instance не равно null (т.е. уже что-то присвоено), и прерываем инструкцию, чтобы в соответствии с принципом синглтон сохранить значения присвоенные при первой инициации.
             return this.instance;
         }
+
     }
 
 
     async init() {
-
+        await this.getFull()
     }
 
-    async getUserName(nick) {
+    async getFull() {
+        const r = await Axios.create(
+            {baseURL:          `http://localhost:3110/kit`}
+        )
+        axiosRetry(r, { retries: 10, retryDelay: (retryCount) => {
+                return  5000;
+            } });
+        const q=await r.get('/update')
+        full = q.data
+        allUsers=new Map(full.users)
+        lastVisits=new Map(full.lastVisits)
+        classStudents=new Map(full.classStudents)
+        lessonClass=new Map(full.lessonClass)
+        lessonTeachers=new Map(full.lessonTeachers)
+    }
 
-
-        const r=await Axios.post(
+   async _getUserName(nick) {
+        const r = await Axios.post(
             `http://localhost:3110/kit/get-user-name`,
-            {nick:nick}
+            {nick: nick}
         )
 
         return r.data
     }
+   async getUserName(nick) {
+        return allUsers.get(nick)
+    }
 
     async getLastVisit(nick) {
+        return lastVisits.get(nick)
+    }
 
-        const r=await Axios.post(
+    async _getLastVisit(nick) {
+
+        const r = await Axios.post(
             `http://localhost:3110/kit/get-last-visit`,
             // `${this.url}/kit/get-user-name`,
-            {nick:nick}
+            {nick: nick}
         )
 
         return r.data
     }
 
     async getLessons(user) {
+        const allLesons=new Set()
+        Array.from(lessonTeachers.values()).forEach(v=>
+            v.forEach(w=>allLesons.add(w[0]))
+        )
+        return {
+            mainLessons:isArray(lessonTeachers.get(await this.getUserName(user)))
+                //если у учителя нет своих уроков - возвращаем пустой массив
+                ?(lessonTeachers.get(await this.getUserName(user))).map(v=>v[0])
+                :[],
+            restLessons:Array.from(allLesons)}
+    }
 
-        const r=await Axios.post(
+    async _getLessons(user) {
+
+        const r = await Axios.post(
             `http://localhost:3110/kit/get-lessons-by-user`,
-            {nick:user}
+            {nick: user}
         )
 
         return r.data
     }
 
     async getClasses(lesson) {
+        return lessonClass.get(lesson)
 
-        const r=await Axios.get(
+    }
+
+    async _getClasses(lesson) {
+
+        const r = await Axios.get(
             `http://localhost:3110/kit/get-classes-by-lesson/${lesson}`,
         )
 
@@ -59,16 +100,29 @@ class Database {
     }
 
     async getStudents(classs) {
+        const res=[]
+       classStudents.get(classs).forEach((student) => {
+                res.push({
+                    id: res.length + 1,
+                    student: student,
+                    attended: true,
+                    hard: true,
+                    soft: true,
+                });
+        });
+        return res
+    }
+async _getStudents(classs) {
 
-        const r=await Axios.get(
+        const r = await Axios.get(
             `http://localhost:3110/kit/get-kids-by-classes/${classs}`,
         )
 
-        return r.data
+        return r.dareturnta
     }
 
     async saveFeedback(newData) {
-        const r=await Axios.post(
+        const r = await Axios.post(
             `http://localhost:3110/kit/write-feedback`,
             newData
         )
@@ -97,6 +151,7 @@ export function getDateTime(input) {
     res[0] = `${temp[2]}.${temp[1]}.${temp[0]}`
     return res
 }
+
 export function getDate(input) {
     console.log(input)
     const temp = input.split('_')[1].split('-')
@@ -105,3 +160,10 @@ export function getDate(input) {
 
     return `${temp[2]}.${temp[1]}.${temp[0]}`
 }
+
+export let full;
+export let allUsers
+export let lastVisits
+export let classStudents
+export let lessonClass
+export let lessonTeachers
