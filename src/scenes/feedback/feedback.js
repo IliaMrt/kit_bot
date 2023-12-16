@@ -284,7 +284,10 @@ commentScene.on(['text', 'callback_query'], ctx => {
 
 const checkScene = new Composer()
 checkScene.on(['text', 'callback_query'], async (ctx) => {
-    const students = ctx.wizard.state.data.fullStudents.map(v => `${v.student}, ${v.attended ? '+' : '-'}${v.hard ? '+' : '-'}${v.soft ? '+' : '-'} ${v.commentary ? v.commentary : ''}`)
+    const students = ctx.wizard.state.data.fullStudents.map(v => `${v.student}, ${v.attended ? '+' : '-'}${v.hard ? '+' : '-'}${v.soft ? '+' : '-'} ${v.commentary 
+        ? v.commentary.slice(0,100)+(v.commentary.length>100?'<...>':'')
+        
+        : ''}`)
     ctx.reply(`Проверка:\n
     Урок: ${ctx.wizard.state.data.lesson}
     Класс: ${ctx.wizard.state.data.class}
