@@ -1,5 +1,5 @@
 import {Composer, Markup, Scenes} from "telegraf";
-import {database, fitText, getDate} from "../../database/database.js";
+import {database, fitText, getDate, lastVisits} from "../../database/database.js";
 import {Interface} from "../../interface/interface.js";
 import {calendar} from "../../index.js";
 
@@ -332,12 +332,14 @@ thanksScene.on('callback_query', async (ctx) => {
     })
     console.log(JSON.stringify(newData))
     await database.saveFeedback(newData)
-/*    full.lastVisits.set(ctx.session.user,  `${new Date().toLocaleDateString(
+    //локально обновляем время последнего сохранения
+    lastVisits.set(ctx.session.user,  `${new Date().toLocaleDateString(
         'ru-Ru',
         {},
     )} в ${new Date().toLocaleTimeString('ru-RU', {
         timeZone: 'Europe/Moscow',
-    })}`)*/
+    })}`)
+    ctx.session.lastVisit=lastVisits.get(ctx.session.user)
     ctx.reply(`Записано`, Markup.inlineKeyboard(
         [Markup.button.callback('Домой', `home`), Markup.button.callback('Ещё', `feedback`)]))
 
