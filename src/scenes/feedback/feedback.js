@@ -266,7 +266,9 @@ commentScene.action('nnext', ctx => {
 })
 
 commentScene.on(['text', 'callback_query'], ctx => {
+    if (ctx.update.hasOwnProperty('callback_query')&&ctx.update?.callback_query.data!='nnext')return
     if (ctx.update.hasOwnProperty('callback_query')) {
+        console.log(JSON.stringify(ctx.update.callback_query))
         ctx.wizard.next();
         return ctx.wizard.steps[ctx.wizard.cursor].handler(ctx);
     }
