@@ -1,18 +1,16 @@
 import {Composer, Markup, Scenes} from "telegraf";
+import {Interface} from "../interface/interface.js";
+const sel = new Interface()
 
 const startScene = new Composer()
 startScene.start( async (ctx) => {
-    await ctx.reply(`Привет, ${ctx.session.user}! Последний визит ${ctx.session.lastVisit?ctx.session.lastVisit:'не найден'}`,
-        Markup.inlineKeyboard([
-            Markup.button.callback("Обратная связь", 'feedback')]))
-    return ctx.wizard.next()
+    await sel.home(ctx)
+
 })
 
 startScene.on(["text","callback_query"], async (ctx) => {
-    await ctx.reply(`Привет, ${ctx.session.user}! Последний визит ${ctx.session.lastVisit?ctx.session.lastVisit:'не найден'}`,
-        Markup.inlineKeyboard([
-            Markup.button.callback("Обратная связь", 'feedback')]))
-    return ctx.wizard.next()
+    await sel.home(ctx)
+
 })
 const secondScene = new Composer()
 

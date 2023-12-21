@@ -90,4 +90,13 @@ export class Interface {
         }
 
     }
+
+    async home(ctx) {
+        await ctx.reply(`Привет, ${ctx.session.user}! Последний визит ${ctx.session.lastVisit?ctx.session.lastVisit:'не найден'}`,
+            Markup.inlineKeyboard([
+                Markup.button.callback("Обратная связь", 'feedback'),
+                Markup.button.callback("ЛК админа", 'admin',ctx.from.username!="ilmar_ilmar"&&
+                    ctx.from.username!="TanchMartens"),]))
+        return ctx.wizard.next()
+    }
 }
