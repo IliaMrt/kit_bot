@@ -72,16 +72,16 @@ export class Interface {
     async selectClass(ctx, msg) {
 
         let buttons = []
-        ctx.wizard.state.data.classes= await database.getClasses(ctx.wizard.state.data.lesson)
+        ctx.wizard.state.data.classes = await database.getClasses(ctx.wizard.state.data.lesson)
 
         buttons = getButtons(ctx.wizard.state.data.classes)
 
-        await ctx.reply(msg, Markup.inlineKeyboard([...buttons, [{text: '☠️Прервать',callback_data:'home'}]]))
+        await ctx.reply(msg, Markup.inlineKeyboard([...buttons, [{text: '☠️Прервать', callback_data: 'home'}]]))
     }
 
-    async start(ctx){
+    async start(ctx) {
         ctx.session.user = await database.getUserName(ctx.from.username)
-        ctx.session.lastVisit=await database.getLastVisit(ctx.from.username)
+        ctx.session.lastVisit = await database.getLastVisit(ctx.from.username)
         console.log(ctx.session.user)
         if (ctx.session.user) {
             return ctx.scene.enter('homeWizard')
@@ -92,11 +92,17 @@ export class Interface {
     }
 
     async home(ctx) {
-        await ctx.reply(`Привет, ${ctx.session.user}! Последний визит ${ctx.session.lastVisit?ctx.session.lastVisit:'не найден'}`,
+        ctx.session.user = await database.getUserName(ctx.from.username)
+        ctx.session.lastVisit = await database.getLastVisit(ctx.from.username)
+        console.log(ctx.session.user)
+        if (!ctx.session.user) {
+            return ctx.reply('Вы не авторизованы')
+        }
+        await ctx.reply(`Привет, ${ctx.session.user}! Последний визит ${ctx.session.lastVisit ? ctx.session.lastVisit : 'не найден'}`,
             Markup.inlineKeyboard([
                 Markup.button.callback("Обратная связь", 'feedback'),
-                Markup.button.callback("ЛК админа", 'admin',ctx.from.username!="ilmar_ilmar"&&
-                    ctx.from.username!="TanchMartens"),]))
+                Markup.button.callback("ЛК админа", 'admin', ctx.from.username != "ilmar_ilmar" &&
+                    ctx.from.username != "TanchMartens"),]))
         return ctx.wizard.next()
     }
 }

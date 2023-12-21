@@ -33,6 +33,7 @@ class Database {
         classStudents=new Map(full.classStudents)
         lessonClass=new Map(full.lessonClass)
         lessonTeachers=new Map(full.lessonTeachers)
+        return
     }
 
    async _getUserName(nick) {

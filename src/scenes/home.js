@@ -15,5 +15,9 @@ startScene.on(["text","callback_query"], async (ctx) => {
 const secondScene = new Composer()
 
 secondScene.action('feedback', async (ctx) => await ctx.scene.enter('feedbackWizard'))
+secondScene.action('admin', async (ctx) => {
+    console.log('admin')
+    await ctx.scene.enter('adminWizard')
+})
 
 export const homeScene = new Scenes.WizardScene('homeWizard', startScene, secondScene)

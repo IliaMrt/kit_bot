@@ -7,13 +7,14 @@ import process from "process";
 import {feedbackScene} from "./scenes/feedback/feedback.js";
 import {errorScene} from "./scenes/error.js";
 import {Interface} from "./interface/interface.js";
+import {adminScene} from "./scenes/admin/admin.js";
 
 
 await readSettings();
 await database.init()
 export const bot = new Telegraf(process.env.TELEGRAF_TOKEN);
 const stage = new Scenes.Stage(
-    [homeScene, feedbackScene, errorScene])
+    [homeScene, feedbackScene, errorScene, adminScene])
 export const calendar = new Calendar(bot, {
     date_format: 'DD-MM-YYYY',
     language: 'ru',
