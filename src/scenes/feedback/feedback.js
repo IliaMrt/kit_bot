@@ -129,7 +129,7 @@ whoWasScene.action('next', async (ctx) => {
         }
     }
 
-    if (res.length) {
+    // if (res.length) {
         ctx.wizard.state.data.students = res
         console.log(res)
         ctx.wizard.state.data.fullStudents.forEach((v) => {
@@ -142,7 +142,7 @@ whoWasScene.action('next', async (ctx) => {
         ctx.wizard.state.data.buttons = []
         ctx.wizard.next();
         return ctx.wizard.steps[ctx.wizard.cursor].handler(ctx);
-    }
+    // }
 })
 whoWasScene.on(['callback_query', 'text'], async (ctx) => {
     console.log('who was')
@@ -210,6 +210,11 @@ megaScene.on('callback_query', async (ctx) => {
                     Markup.button.callback(`✅`, name.toString() + 2)
                 ])
         }
+        console.log(ctx.wizard.state.data.buttons)
+        if (ctx.wizard.state.data.buttons.length==1) {
+            ctx.wizard.next();
+            return ctx.wizard.steps[ctx.wizard.cursor].handler(ctx);
+        }
         ctx.wizard.state.data.buttons.push([Markup.button.callback('Продолжить', 'nnext'),
             Markup.button.callback('☠️Прервать', 'home')])
         return await ctx.reply('Заполняем', Markup.inlineKeyboard(ctx.wizard.state.data.buttons))
@@ -271,14 +276,18 @@ commentScene.on(['text', 'callback_query'], ctx => {
     //todo такое ощущение, что следующие два иф можно удалить
     // if (ctx.update.hasOwnProperty('callback_query')&&ctx.update?.callback_query.data!='nnext')return
     const comment = getCtxData(ctx)
-    if (ctx.update.hasOwnProperty('callback_query') && comment != 'no_comment') {
+/*    if (ctx.update.hasOwnProperty('callback_query') && comment != 'no_comment') {
         console.log(JSON.stringify(ctx.update.callback_query))
+        ctx.wizard.next();
+        return ctx.wizard.steps[ctx.wizard.cursor].handler(ctx);
+    }*/
+    if(!ctx.wizard.state.data.studentsForComments){
         ctx.wizard.next();
         return ctx.wizard.steps[ctx.wizard.cursor].handler(ctx);
     }
     const currStudent = ctx.wizard.state.data.studentsForComments.pop()
     const position = ctx.wizard.state.data.fullStudents.findIndex(v => v.student == currStudent)
-    ctx.wizard.state.data.fullStudents[position].commentary = comment == 'no_comment' ? '' : comment
+    ctx.wizard.state.data.fullStudents[position].commentary = ctx.updateType=='callback_query' ? '' : comment
     if (!ctx.wizard.state.data.studentsForComments.length) {
         console.log(JSON.stringify(ctx.wizard.state.data.fullStudents))
         ctx.wizard.next();
