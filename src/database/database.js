@@ -161,7 +161,13 @@ export function getDate(input) {
 
     return `${temp[2]}.${temp[1]}.${temp[0]}`
 }
-
+export function getCtxData(ctx){
+    switch (ctx.updateType){
+        case 'callback_query' :   return ctx.update.callback_query.data
+        case 'message' :   return ctx.update.message.text
+    }
+    return undefined
+}
 export let full;
 export let allUsers
 export let lastVisits

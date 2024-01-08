@@ -1,5 +1,5 @@
 import {Composer, Markup, Scenes} from "telegraf";
-import {database, fitText, getDate, lastVisits} from "../../database/database.js";
+import {database, fitText, getCtxData, getDate, lastVisits} from "../../database/database.js";
 import {Interface} from "../../interface/interface.js";
 import {calendar} from "../../index.js";
 
@@ -261,35 +261,39 @@ commentScene.action('nnext', ctx => {
         return ctx.wizard.steps[ctx.wizard.cursor].handler(ctx);
     }
 
-    return ctx.reply(`Комментарий по ${ctx.wizard.state.data.studentsForComments[ctx.wizard.state.data.studentsForComments.length - 1]}`)
+    return ctx.reply(`Комментарий по ${ctx.wizard.state.data.studentsForComments[ctx.wizard.state.data.studentsForComments.length - 1]}`,
+        Markup.inlineKeyboard([Markup.button.callback('Нет комментария', 'no_comment')]))
+
 
 })
 
 commentScene.on(['text', 'callback_query'], ctx => {
     //todo такое ощущение, что следующие два иф можно удалить
-    if (ctx.update.hasOwnProperty('callback_query')&&ctx.update?.callback_query.data!='nnext')return
-    if (ctx.update.hasOwnProperty('callback_query')) {
+    // if (ctx.update.hasOwnProperty('callback_query')&&ctx.update?.callback_query.data!='nnext')return
+    const comment = getCtxData(ctx)
+    if (ctx.update.hasOwnProperty('callback_query') && comment != 'no_comment') {
         console.log(JSON.stringify(ctx.update.callback_query))
         ctx.wizard.next();
         return ctx.wizard.steps[ctx.wizard.cursor].handler(ctx);
     }
     const currStudent = ctx.wizard.state.data.studentsForComments.pop()
     const position = ctx.wizard.state.data.fullStudents.findIndex(v => v.student == currStudent)
-    ctx.wizard.state.data.fullStudents[position].commentary = ctx.update.message.text
+    ctx.wizard.state.data.fullStudents[position].commentary = comment == 'no_comment' ? '' : comment
     if (!ctx.wizard.state.data.studentsForComments.length) {
         console.log(JSON.stringify(ctx.wizard.state.data.fullStudents))
         ctx.wizard.next();
         return ctx.wizard.steps[ctx.wizard.cursor].handler(ctx);
     }
-    ctx.reply(`Комментарий по ${ctx.wizard.state.data.studentsForComments[ctx.wizard.state.data.studentsForComments.length - 1]}`)
+    ctx.reply(`Комментарий по ${ctx.wizard.state.data.studentsForComments[ctx.wizard.state.data.studentsForComments.length - 1]}`,
+        Markup.inlineKeyboard([Markup.button.callback('Нет комментария', 'no_comment')]))
 
 })
 
 const checkScene = new Composer()
 checkScene.on(['text', 'callback_query'], async (ctx) => {
-    const students = ctx.wizard.state.data.fullStudents.map(v => `${v.student}, ${v.attended ? '+' : '-'}${v.hard ? '+' : '-'}${v.soft ? '+' : '-'} ${v.commentary 
-        ? v.commentary.slice(0,100)+(v.commentary.length>100?'<...>':'')
-        
+    const students = ctx.wizard.state.data.fullStudents.map(v => `${v.student}, ${v.attended ? '+' : '-'}${v.hard ? '+' : '-'}${v.soft ? '+' : '-'} ${v.commentary
+        ? v.commentary.slice(0, 100) + (v.commentary.length > 100 ? '<...>' : '')
+
         : ''}`)
     ctx.reply(`Проверка:\n
     Урок: ${ctx.wizard.state.data.lesson}
@@ -339,13 +343,13 @@ thanksScene.on('callback_query', async (ctx) => {
     console.log(JSON.stringify(newData))
     await database.saveFeedback(newData)
     //локально обновляем время последнего сохранения
-    lastVisits.set(ctx.session.user,  `${new Date().toLocaleDateString(
+    lastVisits.set(ctx.session.user, `${new Date().toLocaleDateString(
         'ru-Ru',
         {},
     )} в ${new Date().toLocaleTimeString('ru-RU', {
         timeZone: 'Europe/Moscow',
     })}`)
-    ctx.session.lastVisit=lastVisits.get(ctx.session.user)
+    ctx.session.lastVisit = lastVisits.get(ctx.session.user)
     ctx.reply(`Записано`, Markup.inlineKeyboard(
         [Markup.button.callback('Домой', `home`), Markup.button.callback('Ещё', `feedback`)]))
 
@@ -354,4 +358,5 @@ thanksScene.on('callback_query', async (ctx) => {
 
 export const feedbackScene = new Scenes.WizardScene('feedbackWizard',
     lessonSelection, classSelection, whenSelectorScene,
-    calendarScene, homeTaskScene, themeScene, whoWasScene, megaScene, commentScene, checkScene, thanksScene)
+    calendarScene, homeTaskScene, themeScene, whoWasScene,
+    megaScene, commentScene, checkScene, thanksScene)
