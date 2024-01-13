@@ -1,7 +1,6 @@
 import {Markup} from "telegraf";
-import Axios, {all} from "axios";
+import Axios from "axios";
 import axiosRetry from 'axios-retry';
-import axios from "axios";
 import {isArray} from "util";
 
 class Database {
@@ -123,11 +122,21 @@ async _getStudents(classs) {
     }
 
     async saveFeedback(newData) {
+        const r = await Axios.create(
+            {baseURL:          `http://localhost:3110/kit`}
+        )
+        axiosRetry(r, { retries: 10, retryDelay: (retryCount) => {
+                return  5000;
+            } });
+        const q=await r.post('/write-feedback', newData)
+
+        return q.data
+        /*
         const r = await Axios.post(
             `http://localhost:3110/kit/write-feedback`,
             newData
         )
-        return r.data
+        return r.data*/
     }
 }
 
