@@ -161,6 +161,11 @@ whoWasScene.on(['callback_query', 'text'], async (ctx) => {
         ctx.wizard.state.data.items = new Map();
         ctx.wizard.state.data.buttons = [];
     }
+    // отсекаем некорректные нажатия на кнопки из предыдущих диалогов
+    if (ctx.updateType=='callback_query'&&!firstLaunch&&
+        !ctx.wizard.state.data.studentNames.reduce((flag,name)=>flag=flag||name==ctx.update.callback_query.data,false)){
+        return
+    }
     if ((ctx.updateType == 'message' && firstLaunch) || ctx.updateType == "callback_query")
         await sel.multiSelection(ctx, 'studentNames', 'Кто присутствовал?')
 })
