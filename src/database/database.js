@@ -125,7 +125,7 @@ async _getStudents(classs) {
         const r = await Axios.create(
             {baseURL:          `http://localhost:3110/kit`}
         )
-        axiosRetry(r, { retries: 10, retryDelay: (retryCount) => {
+        axiosRetry(r, { retries: 20, retryDelay: (retryCount) => {
                 return  5000;
             } });
         const q=await r.post('/write-feedback', newData)
