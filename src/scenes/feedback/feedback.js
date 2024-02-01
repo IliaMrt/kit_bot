@@ -229,7 +229,6 @@ megaScene.on('callback_query', async (ctx) => {
         const currStudent = ctx.update.callback_query.data.slice(0, ctx.update.callback_query.data.length - 1)
         console.log(currStudent)
         if (!ctx.wizard.state.data.items.has(currStudent)) return;
-        console.log('here')
         const pressed = ctx.update.callback_query.data[ctx.update.callback_query.data.length - 1]
         const studentConditions = ctx.wizard.state.data.items.get(currStudent)
         studentConditions[pressed] = !studentConditions[pressed]
@@ -245,7 +244,8 @@ megaScene.on('callback_query', async (ctx) => {
                 Markup.button.callback(`коммент.`, 'skip')
             ])
         for (const item of items) {
-            console.log(item[1])
+            //если студент отсутствовал - не отображаем его в выборе
+            if (!item[1]) continue
             buttons.push([{text: item[0].toString(), callback_data: 'skip'},
                 {text: `${item[1][0] ? '✅' : '➖'}`, callback_data: item[0] + '0'},
                 {text: `${item[1][1] ? '✅' : '➖'}`, callback_data: item[0] + '1'},
