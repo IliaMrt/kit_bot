@@ -189,10 +189,11 @@ megaScene.action('nnext', async (ctx) => {
 
 megaScene.on('callback_query', async (ctx) => {
     console.log((ctx.update.callback_query.data))
-    if (ctx.update.callback_query.data == 'next') {
+    if (ctx.update.callback_query.data == 'next'&&!ctx.wizard.state.data.hasOwnProperty('items')) {
         ctx.wizard.state.data.items = new Map();
         ctx.wizard.state.data.buttons = [];
     }
+
     if (!ctx.wizard.state.data.buttons?.length) {
         const names = ctx.wizard.state.data.students
         ctx.wizard.state.data.buttons.push(
@@ -222,6 +223,8 @@ megaScene.on('callback_query', async (ctx) => {
         // инвертируем флаг предыдущего выбранного студента
         const currStudent = ctx.update.callback_query.data.slice(0, ctx.update.callback_query.data.length - 1)
         console.log(currStudent)
+        if (!ctx.wizard.state.data.items.has(currStudent)) return;
+        console.log('here')
         const pressed = ctx.update.callback_query.data[ctx.update.callback_query.data.length - 1]
         const studentConditions = ctx.wizard.state.data.items.get(currStudent)
         studentConditions[pressed] = !studentConditions[pressed]
