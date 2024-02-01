@@ -221,6 +221,7 @@ megaScene.on('callback_query', async (ctx) => {
     } else if (ctx.update.callback_query.data != 'skip') {
         // инвертируем флаг предыдущего выбранного студента
         const currStudent = ctx.update.callback_query.data.slice(0, ctx.update.callback_query.data.length - 1)
+        console.log(currStudent)
         const pressed = ctx.update.callback_query.data[ctx.update.callback_query.data.length - 1]
         const studentConditions = ctx.wizard.state.data.items.get(currStudent)
         studentConditions[pressed] = !studentConditions[pressed]

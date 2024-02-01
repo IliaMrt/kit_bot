@@ -4,9 +4,9 @@
   "description": "",
   "main": "src/index.js",
   "scripts": {
-    "start": "node src/index.js",
-    "start:dev": "nodemon src/index.js",
-    "start:docker": "nodemon src/index.js",
+    "start": "node src/index.js prod",
+    "start:dev": "nodemon src/index.js dev",
+    "start:docker": "nodemon src/index.js prod",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],

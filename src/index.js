@@ -41,6 +41,7 @@ bot.launch()
 console.log(`Bot started at ${new Date().toLocaleString()}`)
 
 async function readSettings() {
+    console.log(process.argv[2])
     const file = await open(`./src/config.files/main.config.json`, 'r');
     let temp = (await file.read()).buffer.toString();
     temp = temp.slice(0, (await file.stat()).size);
@@ -48,7 +49,7 @@ async function readSettings() {
     const data = JSON.parse(temp);
     process.env.URL = data.url;
     process.env.GOOGLE_PRIVATE_KEY = data.private_key;
-    process.env.TELEGRAF_TOKEN = data.telegraf_token;
+    process.env.TELEGRAF_TOKEN = process.argv[2]=='prod'?data.telegraf_token:data.telegraf_token_dev;
     process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL = data.client_email;
 
 }
