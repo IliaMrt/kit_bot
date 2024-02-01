@@ -72,7 +72,8 @@ export class Interface {
     async selectClass(ctx, msg) {
 
         let buttons = []
-        ctx.wizard.state.data.classes = await database.getClasses(ctx.wizard.state.data.lesson)
+       //такая хитрая форма, потому что получаем классы с дубликатами. Сразу убираем дубли и сортируем
+        ctx.wizard.state.data.classes = Array.from(new Set(await database.getClasses(ctx.wizard.state.data.lesson))).sort()
 
         buttons = getButtons(ctx.wizard.state.data.classes)
 
