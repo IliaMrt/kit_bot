@@ -323,14 +323,15 @@ checkScene.on(['text', 'callback_query'], async (ctx) => {
 })
 
 const thanksScene = new Composer()
-thanksScene.on('callback_query', async (ctx) => {
-    if (ctx.update.callback_query.data == 'feedback') {
-        return await ctx.scene.enter('feedbackWizard')
+thanksScene.action('feedback',async ctx => {
+    return await ctx.scene.enter('feedbackWizard')
+})
 
-    }
-    if (ctx.update.callback_query.data == 'home') {
-        return await ctx.scene.enter('homeWizard')
-    }
+thanksScene.action('home',async ctx => {
+    return await ctx.scene.enter('homeWizard')
+
+})
+thanksScene.action('save', async (ctx) => {
     const data = ctx.wizard.state.data
     const newData = {
         form: {
