@@ -1,4 +1,4 @@
-import {database, getButtons} from "../database/database.js";
+import {database, getButtons, serverError} from "../database/database.js";
 import {Markup} from "telegraf";
 
 export class Interface {
@@ -81,6 +81,9 @@ export class Interface {
     }
 
     async start(ctx) {
+        if (serverError){
+            return await ctx.scene.enter('errorWizard')
+        }
         ctx.session.user = await database.getUserName(ctx.from.username)
         ctx.session.lastVisit = await database.getLastVisit(ctx.from.username)
         console.log(ctx.session.user)

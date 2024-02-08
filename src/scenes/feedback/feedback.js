@@ -360,7 +360,12 @@ thanksScene.action('save', async (ctx) => {
         })
     })
     console.log(JSON.stringify(newData))
-    await database.saveFeedback(newData)
+    const result= await database.saveFeedback(newData)
+    if (result!=201){
+        return await ctx.reply(`Произошла ошибка, отзыв не был записан.\nНо можно попробовать сохранить ещё раз:`, Markup.inlineKeyboard([
+            [Markup.button.callback('Попробовать сохранить ещё раз', `save`)],[Markup.button.callback('Домой', `home`)]]))
+
+    }
     //локально обновляем время последнего сохранения
     lastVisits.set(ctx.session.user, `${new Date().toLocaleDateString(
         'ru-Ru',

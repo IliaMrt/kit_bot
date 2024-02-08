@@ -19,23 +19,33 @@ class Database {
     }
 
     async getFull() {
-        const r = await Axios.create(
-            {baseURL:          `http://localhost:3110/kit`}
-        )
-        axiosRetry(r, { retries: 10, retryDelay: (retryCount) => {
-                return  5000;
-            } });
-        const q=await r.get('/update')
-        full = q.data
-        allUsers=new Map(full.users)
-        lastVisits=new Map(full.lastVisits)
-        classStudents=new Map(full.classStudents)
-        lessonClass=new Map(full.lessonClass)
-        lessonTeachers=new Map(full.lessonTeachers)
-        return
+        try {
+            const r = await Axios.create(
+                {baseURL: `http://localhost:3110/kit`}
+            )
+            axiosRetry(r, {
+                retries: 20, retryDelay: (retryCount) => {
+                    return 5000;
+                }
+            });
+            const q = await r.get('/update')
+            full = q.data
+            allUsers = new Map(full.users)
+            lastVisits = new Map(full.lastVisits)
+            classStudents = new Map(full.classStudents)
+            lessonClass = new Map(full.lessonClass)
+            lessonTeachers = new Map(full.lessonTeachers)
+            serverError = false
+
+            return
+        } catch (e) {
+            console.log('ERR')
+            console.log(e)
+            serverError = true
+        }
     }
 
-   async _getUserName(nick) {
+    async _getUserName(nick) {
         const r = await Axios.post(
             `http://localhost:3110/kit/get-user-name`,
             {nick: nick}
@@ -43,7 +53,8 @@ class Database {
 
         return r.data
     }
-   async getUserName(nick) {
+
+    async getUserName(nick) {
         return allUsers.get(nick)
     }
 
@@ -63,16 +74,17 @@ class Database {
     }
 
     async getLessons(user) {
-        const allLesons=new Set()
-        Array.from(lessonTeachers.values()).forEach(v=>
-            v.forEach(w=>allLesons.add(w[0]))
+        const allLesons = new Set()
+        Array.from(lessonTeachers.values()).forEach(v =>
+            v.forEach(w => allLesons.add(w[0]))
         )
         return {
-            mainLessons:isArray(lessonTeachers.get(await this.getUserName(user)))
+            mainLessons: isArray(lessonTeachers.get(await this.getUserName(user)))
                 //если у учителя нет своих уроков - возвращаем пустой массив
-                ?(lessonTeachers.get(await this.getUserName(user))).map(v=>v[0])
-                :[],
-            restLessons:Array.from(allLesons)}
+                ? (lessonTeachers.get(await this.getUserName(user))).map(v => v[0])
+                : [],
+            restLessons: Array.from(allLesons)
+        }
     }
 
     async _getLessons(user) {
@@ -100,19 +112,20 @@ class Database {
     }
 
     async getStudents(classs) {
-        const res=[]
-       classStudents.get(classs).forEach((student) => {
-                res.push({
-                    id: res.length + 1,
-                    student: student,
-                    attended: true,
-                    hard: true,
-                    soft: true,
-                });
+        const res = []
+        classStudents.get(classs).forEach((student) => {
+            res.push({
+                id: res.length + 1,
+                student: student,
+                attended: true,
+                hard: true,
+                soft: true,
+            });
         });
         return res
     }
-async _getStudents(classs) {
+
+    async _getStudents(classs) {
 
         const r = await Axios.get(
             `http://localhost:3110/kit/get-kids-by-classes/${classs}`,
@@ -122,15 +135,19 @@ async _getStudents(classs) {
     }
 
     async saveFeedback(newData) {
-        const r = await Axios.create(
-            {baseURL:          `http://localhost:3110/kit`}
-        )
-        axiosRetry(r, { retries: 20, retryDelay: (retryCount) => {
-                return  5000;
-            } });
-        const q=await r.post('/write-feedback', newData)
-
-        return q.data
+        try {
+            const r = await Axios.create(
+                {baseURL: `http://localhost:3110/kit`}
+            )
+            axiosRetry(r, {
+                retries: 10, retryDelay: (retryCount) => {
+                    return 5000;
+                }
+            });
+            return (await r.post('/write-feedback', newData)).status
+        } catch (e){
+            return 500
+        }
         /*
         const r = await Axios.post(
             `http://localhost:3110/kit/write-feedback`,
@@ -170,16 +187,21 @@ export function getDate(input) {
 
     return `${temp[2]}.${temp[1]}.${temp[0]}`
 }
-export function getCtxData(ctx){
-    switch (ctx.updateType){
-        case 'callback_query' :   return ctx.update.callback_query.data
-        case 'message' :   return ctx.update.message.text
+
+export function getCtxData(ctx) {
+    switch (ctx.updateType) {
+        case 'callback_query' :
+            return ctx.update.callback_query.data
+        case 'message' :
+            return ctx.update.message.text
     }
     return undefined
 }
+
 export let full;
 export let allUsers
 export let lastVisits
 export let classStudents
 export let lessonClass
 export let lessonTeachers
+export let serverError
