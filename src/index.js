@@ -16,16 +16,7 @@ export const bot = new Telegraf(process.env.TELEGRAF_TOKEN);
 export const error_bot = new Telegraf(process.env.ERR_TOKEN);
 const stage = new Scenes.Stage(
     [homeScene, feedbackScene, errorScene, adminScene])
-export const calendar = new Calendar(bot, {
-    date_format: 'DD-MM-YYYY',
-    language: 'ru',
-    start_week_day: 1,
-    bot_api: 'telegraf',
-    time_selector_mod: false,
-    time_range: "00:00-23:59",
-    time_step: "15m",
-    custom_start_msg: 'Дата и время начала:'
-});
+
 bot.use(session())
 
 bot.use(stage.middleware())

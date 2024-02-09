@@ -1,7 +1,8 @@
 import {Composer, Markup, Scenes} from "telegraf";
 import {database, fitText, getCtxData, getDate, lastVisits} from "../../database/database.js";
 import {Interface} from "../../interface/interface.js";
-import {calendar} from "../../index.js";
+import {bot} from "../../index.js";
+import {Calendar} from "telegram-inline-calendar";
 
 
 const sel = new Interface()
@@ -59,6 +60,7 @@ whenSelectorScene.on("callback_query", async (ctx) => {
 
 
 const calendarScene = new Composer()
+let calendar
 calendarScene.on('callback_query', async (ctx) => {
 
     if (ctx.update?.callback_query?.data == 'now') {
@@ -72,6 +74,16 @@ calendarScene.on('callback_query', async (ctx) => {
     }
 
     if (ctx.update?.callback_query?.data == 'calendar') {
+        calendar = new Calendar(bot, {
+            date_format: 'DD-MM-YYYY',
+            language: 'ru',
+            start_week_day: 1,
+            bot_api: 'telegraf',
+            time_selector_mod: false,
+            time_range: "00:00-23:59",
+            time_step: "15m",
+            custom_start_msg: 'Дата урока:'
+        });
         calendar.startNavCalendar(ctx)
     }
 
@@ -130,18 +142,18 @@ whoWasScene.action('next', async (ctx) => {
     }
 
     // if (res.length) {
-        ctx.wizard.state.data.students = res
-        console.log(res)
-        ctx.wizard.state.data.fullStudents.forEach((v) => {
-            if (!res.find(r => v.student == r)) {
-                v.attended = false
-                v.hard = false
-                v.soft = false
-            }
-        })
-        ctx.wizard.state.data.buttons = []
-        ctx.wizard.next();
-        return ctx.wizard.steps[ctx.wizard.cursor].handler(ctx);
+    ctx.wizard.state.data.students = res
+    console.log(res)
+    ctx.wizard.state.data.fullStudents.forEach((v) => {
+        if (!res.find(r => v.student == r)) {
+            v.attended = false
+            v.hard = false
+            v.soft = false
+        }
+    })
+    ctx.wizard.state.data.buttons = []
+    ctx.wizard.next();
+    return ctx.wizard.steps[ctx.wizard.cursor].handler(ctx);
     // }
 })
 whoWasScene.on(['callback_query', 'text'], async (ctx) => {
@@ -162,8 +174,8 @@ whoWasScene.on(['callback_query', 'text'], async (ctx) => {
         ctx.wizard.state.data.buttons = [];
     }
     // отсекаем некорректные нажатия на кнопки из предыдущих диалогов
-    if (ctx.updateType=='callback_query'&&!firstLaunch&&
-        !ctx.wizard.state.data.studentNames.reduce((flag,name)=>flag=flag||name==ctx.update.callback_query.data,false)){
+    if (ctx.updateType == 'callback_query' && !firstLaunch &&
+        !ctx.wizard.state.data.studentNames.reduce((flag, name) => flag = flag || name == ctx.update.callback_query.data, false)) {
         return
     }
     if ((ctx.updateType == 'message' && firstLaunch) || ctx.updateType == "callback_query")
@@ -194,7 +206,7 @@ megaScene.action('nnext', async (ctx) => {
 
 megaScene.on('callback_query', async (ctx) => {
     console.log((ctx.update.callback_query.data))
-    if (ctx.update.callback_query.data == 'next'&&!ctx.wizard.state.data.hasOwnProperty('items')) {
+    if (ctx.update.callback_query.data == 'next' && !ctx.wizard.state.data.hasOwnProperty('items')) {
         ctx.wizard.state.data.items = new Map();
         ctx.wizard.state.data.buttons = [];
     }
@@ -217,7 +229,7 @@ megaScene.on('callback_query', async (ctx) => {
                 ])
         }
         console.log(ctx.wizard.state.data.buttons)
-        if (ctx.wizard.state.data.buttons.length==1) {
+        if (ctx.wizard.state.data.buttons.length == 1) {
             ctx.wizard.next();
             return ctx.wizard.steps[ctx.wizard.cursor].handler(ctx);
         }
@@ -285,18 +297,18 @@ commentScene.on(['text', 'callback_query'], ctx => {
     //todo такое ощущение, что следующие два иф можно удалить
     // if (ctx.update.hasOwnProperty('callback_query')&&ctx.update?.callback_query.data!='nnext')return
     const comment = getCtxData(ctx)
-/*    if (ctx.update.hasOwnProperty('callback_query') && comment != 'no_comment') {
-        console.log(JSON.stringify(ctx.update.callback_query))
-        ctx.wizard.next();
-        return ctx.wizard.steps[ctx.wizard.cursor].handler(ctx);
-    }*/
-    if(!ctx.wizard.state.data.studentsForComments){
+    /*    if (ctx.update.hasOwnProperty('callback_query') && comment != 'no_comment') {
+            console.log(JSON.stringify(ctx.update.callback_query))
+            ctx.wizard.next();
+            return ctx.wizard.steps[ctx.wizard.cursor].handler(ctx);
+        }*/
+    if (!ctx.wizard.state.data.studentsForComments) {
         ctx.wizard.next();
         return ctx.wizard.steps[ctx.wizard.cursor].handler(ctx);
     }
     const currStudent = ctx.wizard.state.data.studentsForComments.pop()
     const position = ctx.wizard.state.data.fullStudents.findIndex(v => v.student == currStudent)
-    ctx.wizard.state.data.fullStudents[position].commentary = ctx.updateType=='callback_query' ? '' : comment
+    ctx.wizard.state.data.fullStudents[position].commentary = ctx.updateType == 'callback_query' ? '' : comment
     if (!ctx.wizard.state.data.studentsForComments.length) {
         console.log(JSON.stringify(ctx.wizard.state.data.fullStudents))
         ctx.wizard.next();
@@ -328,11 +340,11 @@ checkScene.on(['text', 'callback_query'], async (ctx) => {
 })
 
 const thanksScene = new Composer()
-thanksScene.action('feedback',async ctx => {
+thanksScene.action('feedback', async ctx => {
     return await ctx.scene.enter('feedbackWizard')
 })
 
-thanksScene.action('home',async ctx => {
+thanksScene.action('home', async ctx => {
     return await ctx.scene.enter('homeWizard')
 
 })
@@ -360,10 +372,10 @@ thanksScene.action('save', async (ctx) => {
         })
     })
     console.log(JSON.stringify(newData))
-    const result= await database.saveFeedback(newData)
-    if (result!=201){
+    const result = await database.saveFeedback(newData)
+    if (result != 201) {
         return await ctx.reply(`Произошла ошибка, отзыв не был записан.\nНо можно попробовать сохранить ещё раз:`, Markup.inlineKeyboard([
-            [Markup.button.callback('Попробовать сохранить ещё раз', `save`)],[Markup.button.callback('Домой', `home`)]]))
+            [Markup.button.callback('Попробовать сохранить ещё раз', `save`)], [Markup.button.callback('Домой', `home`)]]))
 
     }
     //локально обновляем время последнего сохранения
